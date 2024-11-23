@@ -1,0 +1,44 @@
+services:
+  giropops-senhas:
+    build:
+      context: ./Dockerfiles
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    networks:
+      - giropops
+    environment:
+      REDIS_HOST: redis
+    volumes:
+      - strigus:/strigus
+    depends_on:
+      - redis
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+        limits:
+          cpus: '0.5'
+          memory: 256M
+  redis:
+    image: cgr.dev/chainguard/redis:latest
+    networks:
+      - giropops
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  giropops:
+    driver: bridge
+volumes:
+  strigus:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ~/Estudos/LinuxTips/Pick2024/Docker/Compose
